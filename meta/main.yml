@@ -1,7 +1,9 @@
 ---
 dependencies:
-  - role: javik.certbot
-    when: apache2_use_letsencrypt
+  - name: javik.scripts
+    src: https://gitlab.com/Javik/ansible-scripts-role
+    scm: git
+    version: main
     
 galaxy_info:
   role_name: apache2
