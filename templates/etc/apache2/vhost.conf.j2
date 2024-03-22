@@ -1,0 +1,54 @@
+####################################
+##### MANAGED BY ANSIBLE ({{ ansible_role_name }})
+####################################
+
+{% if 'redirect_to_https' in item and item.redirect_to_https == true %}
+<VirtualHost *:80> 
+    ServerName {{ item.host }}
+{% if 'alias' in item %}   
+    ServerAlias {{ item.alias }}
+{% endif %}
+    Redirect permanent / https://{{ item.host }}
+</VirtualHost>
+{% else %}
+<VirtualHost *:80>
+    ServerName {{ item.host }}
+{% if 'alias' in item %}   
+    ServerAlias {{ item['alias'] }}
+{% endif %}
+
+    DocumentRoot {{ item.root }}
+    DirectoryIndex {{ item['directoryindex'] if 'directoryindex' in item else 'index.php index.html' }}
+
+    <Directory {{ item.root }}>
+        Options {{ item['root_options'] if 'root_options' in item else 'FollowSymLinks' }}
+        AllowOverride {{ item['root_allowoverride'] if 'root_allowoverride' in item else 'None' }}
+        Require all granted
+    </Directory>
+    Header set X-Hostname ${HOSTNAME}
+</VirtualHost>
+{% endif %}
+
+{% if 'https' in item and item.https == true %}
+<IfModule ssl_module>
+    <VirtualHost *:443>
+        ServerName {{ item.host }}
+{% if 'alias' in item %}   
+        ServerAlias {{ item.alias }}
+{% endif %}
+        DocumentRoot {{ item.root }}
+        DirectoryIndex {{ item['directoryindex'] if 'directoryindex' in item else 'index.php index.html' }}
+
+        <Directory {{ item.root }}>
+            Options {{ item['root_options'] if 'root_options' in item else 'FollowSymLinks' }}
+            AllowOverride {{ item['root_allowoverride'] if 'root_allowoverride' in item else 'None' }}
+            Require all granted
+        </Directory>
+
+        SSLEngine on
+        SSLCertificateFile /etc/letsencrypt/live/{{ item.host }}/fullchain.pem
+        SSLCertificateKeyFile /etc/letsencrypt/live/{{ item.host }}/privkey.pem
+        SSLCertificateChainFile /etc/letsencrypt/live/{{ item.host }}/chain.pem
+    </VirtualHost>
+</IfModule>
+{% endif %}

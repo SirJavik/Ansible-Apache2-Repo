@@ -1,0 +1,12 @@
+####################################
+##### MANAGED BY ANSIBLE ({{ ansible_role_name }})
+####################################
+
+<VirtualHost _default_:80>
+    DocumentRoot "{{ apache2_default_root }}"
+
+    <Directory "{{ apache2_default_root }}">
+        AllowOverride None
+        Require all granted
+    </Directory>
+</VirtualHost>

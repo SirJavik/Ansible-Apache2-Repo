@@ -1,0 +1,38 @@
+---
+# Apache2
+apache2_version: latest
+apache2_modules:
+  - access_compat 
+  - socache_shmcb
+  - alias 
+  - auth_basic 
+  - authn_core 
+  - authn_file 
+  - authz_core 
+  - authz_host 
+  - authz_user 
+  - autoindex 
+  - deflate 
+  - dir 
+  - env 
+  - filter
+  - headers
+  - mime 
+  - mpm_event 
+  - negotiation 
+  - reqtimeout
+  - rewrite
+  - setenvif 
+  - status
+  - proxy
+#  - ssl
+  - proxy_fcgi
+
+apache2_confs:
+  - security
+  - hostname
+
+apache2_use_letsencrypt: true
+apache2_enable_default: true
+apache2_default_filename: 000-default
+apache2_default_root: /data/web/default/htdocs

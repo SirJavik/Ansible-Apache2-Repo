@@ -1,0 +1,24 @@
+---
+- name: Update the repository cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install apache2 version {{ apache2_version }}
+  ansible.builtin.apt:
+    name: apache2
+    state: "{{ apache2_version }}"
+
+- name: Install libapache2-mod-fcgid
+  ansible.builtin.apt:
+    name: libapache2-mod-fcgid
+    state: latest
+
+- name: Copy apache2.conf to servers
+  ansible.builtin.template:
+      src: ./templates/etc/apache2/apache2.conf.j2
+      dest: /etc/apache2/apache2.conf
+      owner: root
+      group: root
+      mode: '0644'
+  notify:
+    - Restart apache2

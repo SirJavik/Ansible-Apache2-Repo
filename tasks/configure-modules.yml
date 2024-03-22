@@ -1,0 +1,34 @@
+---
+#############################
+#### Cleanup Modules
+#############################
+
+- set_fact:
+    managed_modules: "{{ apache2_modules }}"
+  register: managed_modules_state
+
+- find:
+    paths: /etc/apache2/mods-enabled
+    patterns: '*.load'
+    file_type: any 
+  register: mods_enabled_contents
+
+- name: Disable unmanaged modules
+  community.general.apache2_module:
+    state: absent
+    name: "{{ item }}"
+  loop: "{{ mods_enabled_contents.files | map(attribute='path') | map('basename') | map('splitext') | map('first') | list }}"
+  when: item not in managed_modules
+  notify: Restart apache2
+
+- name: Enable managed modules
+  community.general.apache2_module:
+    state: present
+    name: "{{ item }}"
+  loop: "{{ apache2_modules }}"
+  when: item in managed_modules
+  notify: Restart apache2
+
+#############################
+#### END
+#############################

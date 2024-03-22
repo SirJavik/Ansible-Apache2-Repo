@@ -1,0 +1,16 @@
+---
+- name: Install apache2
+  ansible.builtin.include_tasks:
+    file: install-apache2.yml
+
+- name: Configure vHosts
+  ansible.builtin.include_tasks:
+    file: configure-vhosts.yml
+
+- name: Configure Modules
+  ansible.builtin.include_tasks:
+    file: configure-modules.yml
+
+- name: Configure Configs
+  ansible.builtin.include_tasks:
+    file: configure-configs.yml

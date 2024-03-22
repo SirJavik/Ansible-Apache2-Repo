@@ -1,0 +1,56 @@
+---
+#############################
+#### Cleanup conf
+#############################
+
+- set_fact:
+    managed_confs: "{{ apache2_confs | product(['conf']) | map('join', '.') }}"
+
+- find:
+    paths: /etc/apache2/conf-available
+  register: conf_available_contents
+
+- name: Remove unmanaged conf files
+  file:
+    path: /etc/apache2/conf-available/{{ item }}
+    state: absent
+  with_items: "{{ conf_available_contents.files | map(attribute='path') | map('basename') | list }}"
+  when: item not in managed_confs
+  
+# links may differ from files, therefore we need our own find task for them
+- find:
+    paths: /etc/apache2/conf-enabled
+    file_type: any 
+  register: conf_enabled_contents
+
+- name: Remove unmanaged conf links
+  file:
+    path: /etc/apache2/conf-enabled/{{ item }}
+    state: absent
+  with_items: "{{ conf_enabled_contents.files | map(attribute='path') | map('basename') | list }}"
+  when: item not in managed_confs
+  notify: Restart apache2
+
+#############################
+#### END
+#############################
+
+- name: Create Conf files
+  ansible.builtin.template:
+    src: ./templates/etc/apache2/conf/{{ item }}.conf.j2
+    dest: /etc/apache2/conf-available/{{ item }}.conf
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ apache2_confs }}"
+  notify: Reload apache2
+
+- name: Link confs and reload apache2
+  ansible.builtin.file:
+    src: /etc/apache2/conf-available/{{ item }}.conf
+    dest: /etc/apache2/conf-enabled/{{ item }}.conf
+    owner: root
+    group: root
+    state: link
+  loop: "{{ apache2_confs }}"
+  notify: Reload apache2
