@@ -1,16 +1,46 @@
 ---
+#########################################
+#            _             _ _          #
+#           | |           (_) |         #
+#           | | __ ___   ___| | __      #
+#       _   | |/ _` \ \ / / | |/ /      #
+#      | |__| | (_| |\ V /| |   <       #
+#       \____/ \__,_| \_/ |_|_|\_\      #
+#                                       #
+#########################################  
+
+# This YAML file contains a list of tasks for configuring and installing Apache2 using Ansible.
+
+- name: Import system-specific variables
+  ansible.builtin.import_tasks:
+    file: import-vars.yml
+
 - name: Install apache2
   ansible.builtin.import_tasks:
     file: install-apache2.yml
 
-- name: Configure vHosts
+- name: Cleanup Directories
   ansible.builtin.import_tasks:
-    file: configure-vhosts.yml
+    file: cleanup-directories.yml
 
 - name: Configure Modules
   ansible.builtin.import_tasks:
     file: configure-modules.yml
 
 - name: Configure Configs
-  ansible.builtin.import_tasks:
+  ansible.builtin.include_tasks:
     file: configure-configs.yml
+  loop: "{{ apache2_confs }}"
+  loop_control:
+    loop_var: conf
+
+- name: Configure Default Vhost
+  ansible.builtin.import_tasks:
+    file: configure-default-vhost.yml
+
+- name: Configure vHosts
+  ansible.builtin.include_tasks:
+    file: configure-vhosts.yml
+  loop: "{{ apache2_vhosts }}"
+  loop_control:
+    loop_var: vhost
