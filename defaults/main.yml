@@ -25,7 +25,7 @@ apache2_modules:
   - setenvif 
   - status
   - proxy
-#  - ssl
+  - ssl
   - proxy_fcgi
 
 apache2_confs:
@@ -36,3 +36,13 @@ apache2_use_letsencrypt: true
 apache2_enable_default: true
 apache2_default_filename: 000-default
 apache2_default_root: /data/web/default/htdocs
+
+apache2_vhosts: []
+#  - name: 001-beta_javik_net
+#    host: beta.javik.net
+#    directoryindex: index.php
+#    root: /data/web/javik.net/beta/htdocs
+#    root_options: 'FollowSymLinks'
+#    root_allowoverride: all
+#    redirect_to_https: true
+#    https: true

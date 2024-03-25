@@ -46,9 +46,9 @@
         </Directory>
 
         SSLEngine on
-        SSLCertificateFile /etc/letsencrypt/live/{{ item.host }}/fullchain.pem
-        SSLCertificateKeyFile /etc/letsencrypt/live/{{ item.host }}/privkey.pem
-        SSLCertificateChainFile /etc/letsencrypt/live/{{ item.host }}/chain.pem
+        SSLCertificateFile {{ item.cert }}
+        SSLCertificateKeyFile {{ item.privkey }}
+        #SSLCertificateChainFile /etc/letsencrypt/live/{{ item.host }}/chain.pem
     </VirtualHost>
 </IfModule>
 {% endif %}
