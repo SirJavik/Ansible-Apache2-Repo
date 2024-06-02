@@ -39,3 +39,14 @@
     - Restart apache2
   # Copy the apache2.conf template file to the servers and set the appropriate permissions.
   # Notify the "Restart apache2" handler to restart the Apache2 service if the configuration file is changed.
+
+- name: Allow http and https traffic through firewalld
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop: 
+    - http
+    - https
+  # Allow HTTP and HTTPS traffic through the firewalld service.

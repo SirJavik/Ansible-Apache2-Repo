@@ -14,11 +14,14 @@
 {% if 'redirect_to_https' in vhost and vhost.redirect_to_https == true %}
 <VirtualHost *:80> 
     ServerName {{ vhost.host }}
-{% if 'alias' in vhost %}   
-    ServerAlias {{ vhost.alias }}
-{% endif %}
     Redirect permanent / https://{{ vhost.host }}
 </VirtualHost>
+{% if 'alias' in vhost %}  
+<VirtualHost *:80> 
+    ServerName {{ vhost.alias }}
+    Redirect permanent / https://{{ vhost.alias }}
+</VirtualHost> 
+{% endif %}
 {% else %}
 <VirtualHost *:80>
     ServerName {{ vhost.host }}
@@ -34,15 +37,15 @@
         AllowOverride {{ vhost['root_allowoverride'] if 'root_allowoverride' in vhost else 'None' }}
         Require all granted
     </Directory>
-    Header set X-Hostname ${HOSTNAME}
+    Header set X-Hostname {{ vhost.host }}
 </VirtualHost>
 {% endif %}
 
 {% if 'https' in vhost and vhost.https == true %}
 <IfModule ssl_module>
     <VirtualHost *:443>
-        ServerName {{ vhost.host }}
-{% if 'alias' in vhost %}   
+        ServerName {{ vhost.host -}}
+{%- if 'alias' in vhost %}   
         ServerAlias {{ vhost.alias }}
 {% endif %}
         DocumentRoot {{ vhost.root }}
@@ -53,6 +56,7 @@
             AllowOverride {{ vhost['root_allowoverride'] if 'root_allowoverride' in vhost else 'None' }}
             Require all granted
         </Directory>
+        Header set X-Hostname {{ vhost.host }}
 
         SSLEngine on
         SSLCertificateFile {{ vhost.cert }}
