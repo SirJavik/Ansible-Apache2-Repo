@@ -23,17 +23,6 @@
   ansible.builtin.import_tasks:
     file: cleanup-directories.yml
 
-- name: Configure Modules
-  ansible.builtin.import_tasks:
-    file: configure-modules.yml
-
-- name: Configure Configs
-  ansible.builtin.include_tasks:
-    file: configure-configs.yml
-  loop: "{{ apache2_confs }}"
-  loop_control:
-    loop_var: conf
-
 - name: Configure Default Vhost
   ansible.builtin.import_tasks:
     file: configure-default-vhost.yml
@@ -44,3 +33,15 @@
   loop: "{{ apache2_vhosts }}"
   loop_control:
     loop_var: vhost
+    index_var: vindex
+
+- name: Configure Configs
+  ansible.builtin.include_tasks:
+    file: configure-configs.yml
+  loop: "{{ apache2_confs }}"
+  loop_control:
+    loop_var: conf
+
+- name: Configure Modules
+  ansible.builtin.import_tasks:
+    file: configure-modules.yml

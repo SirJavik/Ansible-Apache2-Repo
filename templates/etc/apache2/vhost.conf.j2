@@ -11,57 +11,67 @@
 #                                       #
 ######################################### 
 
+########
+##### HTTP
+########
+
 {% if 'redirect_to_https' in vhost and vhost.redirect_to_https == true %}
 <VirtualHost *:80> 
+    ## vHost
     ServerName {{ vhost.host }}
     Redirect permanent / https://{{ vhost.host }}
 </VirtualHost>
-{% if 'alias' in vhost %}  
+{% if 'alias' in vhost %}
+########
+##### ALIAS
+########  
+
+{% for alias in vhost.alias %}
 <VirtualHost *:80> 
-    ServerName {{ vhost.alias }}
-    Redirect permanent / https://{{ vhost.alias }}
-</VirtualHost> 
+    ## vHost
+    ServerName {{ alias }}
+    Redirect permanent / https://{{ alias }}
+</VirtualHost>
+
+{% endfor %}
 {% endif %}
-{% else %}
+{% else -%}
 <VirtualHost *:80>
+    ## vHost
     ServerName {{ vhost.host }}
 {% if 'alias' in vhost %}   
-    ServerAlias {{ vhost['alias'] }}
+    ServerAlias {% for alias in vhost.alias %} {{ alias }} {% endfor %}
 {% endif %}
 
     DocumentRoot {{ vhost.root }}
     DirectoryIndex {{ vhost['directoryindex'] if 'directoryindex' in vhost else 'index.php index.html' }}
-
-    <Directory {{ vhost.root }}>
-        Options {{ vhost['root_options'] if 'root_options' in vhost else 'FollowSymLinks' }}
-        AllowOverride {{ vhost['root_allowoverride'] if 'root_allowoverride' in vhost else 'None' }}
-        Require all granted
-    </Directory>
-    Header set X-Hostname {{ vhost.host }}
+    {% if 'extra' in vhost %}{{ vhost['extra'] }}{% endif %}
+    Header set X-Hostname {{ ansible_facts['fqdn'] }}
 </VirtualHost>
 {% endif %}
 
 {% if 'https' in vhost and vhost.https == true %}
+########
+##### HTTPS
+########
+
 <IfModule ssl_module>
     <VirtualHost *:443>
-        ServerName {{ vhost.host -}}
-{%- if 'alias' in vhost %}   
-        ServerAlias {{ vhost.alias }}
-{% endif %}
+        ## vHost
+        ServerName {{ vhost.host }}
+        {% if 'alias' in vhost %}ServerAlias {% for alias in vhost.alias %}{{ alias }}{% endfor %}{% endif %}
+        
         DocumentRoot {{ vhost.root }}
         DirectoryIndex {{ vhost['directoryindex'] if 'directoryindex' in vhost else 'index.php index.html' }}
 
-        <Directory {{ vhost.root }}>
-            Options {{ vhost['root_options'] if 'root_options' in vhost else 'FollowSymLinks' }}
-            AllowOverride {{ vhost['root_allowoverride'] if 'root_allowoverride' in vhost else 'None' }}
-            Require all granted
-        </Directory>
-        Header set X-Hostname {{ vhost.host }}
-
+        ## SSL
         SSLEngine on
         SSLCertificateFile {{ vhost.cert }}
         SSLCertificateKeyFile {{ vhost.privkey }}
         #SSLCertificateChainFile /etc/letsencrypt/live/{{ vhost.host }}/chain.pem
+
+        {% if 'extra' in vhost %}{{ vhost['extra'] }}{% endif %}
+        Header set X-Hostname {{ ansible_facts['fqdn'] }}
     </VirtualHost>
 </IfModule>
 {% endif %}

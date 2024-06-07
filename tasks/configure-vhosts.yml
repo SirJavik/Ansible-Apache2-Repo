@@ -10,20 +10,30 @@
 #########################################  
 
 # This task creates vhost configuration files for Apache2.
-- name: Ensure {{ vhost.name }}.conf is present
+
+# Create fact from vhost.host and replace dots with underscores.
+- name: Format index number 
+  set_fact:
+    indexnum: '{{ "%02d" | format(vindex+1) }}'
+
+- name: Set vhost name
+  set_fact:
+    vhost_name: "{{ indexnum }}-{{ vhost.host | replace('.', '_') }}"
+
+- name: Ensure {{ vhost_name }}.conf is present
   ansible.builtin.template:
     src: ./templates/etc/apache2/vhost.conf.j2
-    dest: /etc/apache2/sites-available/{{ vhost.name }}.conf
+    dest: /etc/apache2/sites-available/{{ vhost_name }}.conf
     owner: root
     group: root
     mode: '0644'
   notify: Reload apache2
 
 # This task links the vhost configuration files and reloads Apache2.
-- name: Link {{ vhost.name }}.conf to sites-enabled
+- name: Link {{ vhost_name }}.conf to sites-enabled
   ansible.builtin.file:
-    src: /etc/apache2/sites-available/{{ vhost.name }}.conf
-    dest: /etc/apache2/sites-enabled/{{ vhost.name }}.conf
+    src: /etc/apache2/sites-available/{{ vhost_name }}.conf
+    dest: /etc/apache2/sites-enabled/{{ vhost_name }}.conf
     owner: root
     group: root
     state: link

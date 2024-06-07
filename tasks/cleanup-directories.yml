@@ -55,12 +55,21 @@
   notify: Restart apache2
 
 ## Cleanup unmanaged vhost configuration files and links
-- set_fact:
+
+- name: Format vhosts
+  set_fact:
+    formated_vhosts: "{{ (formated_vhosts | default([])) + [ ('%02d' | format(indexnum+1)) +'-'+ (item.host | replace('.', '_')) + '.conf' ] }}"
+  loop: "{{ apache2_vhosts }}"
+  loop_control:
+    index_var: indexnum
+
+- name: Set managed sites
+  set_fact:
     managed_sites: |
       {% if apache2_enable_default == true %}
-        {{ ( apache2_vhosts | map(attribute='name') | product(['.conf']) | map('join') | list ) + [ apache2_default_filename + '.conf' ] }}
+        {{ formated_vhosts + [ apache2_default_filename + '.conf' ] }}
       {% else %}
-        {{ ( apache2_vhosts | map(attribute='name') | product(['.conf']) | map('join') | list ) }}
+        {{ formated_vhosts }}
       {% endif %}
 
 - find:
@@ -71,7 +80,7 @@
   file:
     path: /etc/apache2/sites-available/{{ item }}
     state: absent
-  with_items: "{{ sites_available_contents.files | map(attribute='path') | map('basename') | list }}"
+  loop: "{{ sites_available_contents.files | map(attribute='path') | map('basename') | list }}"
   when: item not in managed_sites
   
 - find:
@@ -83,6 +92,6 @@
   file:
     path: /etc/apache2/sites-enabled/{{ item }}
     state: absent
-  with_items: "{{ sites_enabled_contents.files | map(attribute='path') | map('basename') | list }}"
+  loop: "{{ sites_enabled_contents.files | map(attribute='path') | map('basename') | list }}"
   when: item not in managed_sites
   notify: Restart apache2
