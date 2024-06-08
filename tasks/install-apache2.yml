@@ -50,3 +50,12 @@
     - http
     - https
   # Allow HTTP and HTTPS traffic through the firewalld service.
+
+- name: Add www-data user to additional groups
+  ansible.builtin.user:
+    name: www-data
+    groups: "{{ apache2_additional_groups }}"
+    append: true
+  notify:
+    - Restart apache2
+  # Add the www-data user to any additional groups specified in the apache2_additional_groups variable.

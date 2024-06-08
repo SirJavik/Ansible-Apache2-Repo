@@ -37,6 +37,8 @@ apache2_enable_default: true
 apache2_default_filename: 00-default
 apache2_default_root: /data/web/default/htdocs
 
+apache2_additional_groups: []
+
 apache2_vhosts: []
 #  - name: 001-beta_javik_net
 #    host: beta.javik.net

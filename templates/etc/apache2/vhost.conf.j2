@@ -40,7 +40,7 @@
     ## vHost
     ServerName {{ vhost.host }}
 {% if 'alias' in vhost %}   
-    ServerAlias {% for alias in vhost.alias %} {{ alias }} {% endfor %}
+    {% if 'alias' in vhost %}ServerAlias {{ vhost.alias | join(' ') }}{% endif %}
 {% endif %}
 
     DocumentRoot {{ vhost.root }}
@@ -59,7 +59,7 @@
     <VirtualHost *:443>
         ## vHost
         ServerName {{ vhost.host }}
-        {% if 'alias' in vhost %}ServerAlias {% for alias in vhost.alias %}{{ alias }}{% endfor %}{% endif %}
+        {% if 'alias' in vhost %}ServerAlias {{ vhost.alias | join(' ') }}{% endif %}
         
         DocumentRoot {{ vhost.root }}
         DirectoryIndex {{ vhost['directoryindex'] if 'directoryindex' in vhost else 'index.php index.html' }}
